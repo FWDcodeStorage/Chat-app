@@ -3,3 +3,13 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/*chat-box; aligning divs */
+
+#me {
+  justify-content: flex-start;
+}
+
+#you {
+  justify-content: flex-end;
+}
