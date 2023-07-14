@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import {BiSend} from 'react-icons/bi'
+import Images from "../Images";
+import ActiveUsersList from "./ActiveUsersList";
 
 const Chat = ({ username, room, socket }) => {
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
+  const [showActiveUsers, setShowActiveUsers] = useState(false);
 
   const sendMessage = async () => {
     if (message !== "") {
@@ -29,8 +31,6 @@ const Chat = ({ username, room, socket }) => {
       ]);
 
       await socket.emit("send_message", messageInfo);
-      
-      
 
       setMessage("");
     }
@@ -56,26 +56,34 @@ const Chat = ({ username, room, socket }) => {
     };
   }, [socket]);
 
-
   return (
-    <div className='chat w-[100vw] h-[100vh] bg-[#2b2b2b] p-[1em] overflow-hidden text-white'>
-      <div className='chat-header h-[10%] w-full bg-[#67ff4f] mb-[.5em]'>
-        LOGO
+    <div className='chat relative w-[95vw] h-[95vh] bg-[#2b2b2b] my-[1em] sm:px-[1em] overflow-hidden text-white border-2 border-[#67ff4f] rounded-md'>
+      <div className='chat-header h-[12%] py-[.3em] w-full border-b-2 border-b-[#67ff4f] flex justify-between items-center'>
+        <img src={Images.logo} alt='logo' className='max-h-[3em]' />
+        <img
+          src={Images.usersLogo}
+          onClick={() => setShowActiveUsers(!showActiveUsers)}
+          alt='active-users'
+          className='max-h-[3em] hover:transition-all hover:scale-75'
+        />
       </div>
 
-      <div className='chat-body overflow-y-scroll rounded-md border-2 border-[#67ff4f] w-full h-[70%] p-[1em] mb-[.5em] flex flex-col gap-2'>
+      <div className='chat-body overflow-y-scroll rounded-md w-full sm:h-[65%] h-[70%] p-[1em] mb-[.5em] flex flex-col gap-2'>
         {messageList.map((msg) => (
           <div
             key={msg}
-            className={` msg-box w-fit flex flex-col rounded-md py-1 px-2 ${
-              username === msg.username ? "bg-gray-200" : "bg-green-300"
+            className={` msg-box w-fit flex flex-col rounded-md py-1 px-2 sm:text-base text-sm tracking-wide font-light ${
+              username === msg.username ? "bg-gray-500" : "bg-green-300"
             }`}
-            style={{ alignSelf: username === msg.username ? "flex-start" : "flex-end" }}
+            style={{
+              alignSelf: username === msg.username ? "flex-start" : "flex-end",
+              textAlign: username === msg.username ? "start" : "end"
+            }}
           >
             <div className='msg'>
               <p>{msg.message}</p>
             </div>
-            <div className='meta text-xs text-gray-400'>
+            <div className='meta text-xs font-extralight text-gray-400'>
               <p>
                 {msg.username} <span>{msg.time}</span>
               </p>
@@ -84,22 +92,30 @@ const Chat = ({ username, room, socket }) => {
         ))}
       </div>
 
-      <div className='chat-footer h-[15%] w-full border border-[#67ff4f] hover:shadow-lg hover:shadow-[#67ff4f85] rounded-md flex'>
+      <div className='chat-footer h-[20%]  w-full border border-[#67ff4f] hover:shadow-lg hover:shadow-[#67ff4f85] rounded-md flex'>
         <input
           type='text'
+          placeholder='Type...'
           value={message}
-          className='h-full md:w-[90%] w-[85%] bg-transparent'
+          className='h-full outline-none sm:w-[90%] w-full bg-transparent px-[.2em] sm:text-lg tracking-wide text-md'
           onChange={(e) => {
             setMessage(e.target.value);
           }}
         />
         <button
-          className='md:w-[10%] w-[15%] h-full bg-[#67ff4f] text-white hover:bg-[#39932b] flex justify-center items-center'
+          className='sm:w-[10%] w-fit h-full  text-white flex justify-center items-center px-[.2em]'
           onClick={sendMessage}
         >
-          <BiSend size={40}/>
+          <img
+            src={Images.sendBtn}
+            alt='send'
+            className='sm:h-[4em] h-[3em] hover:transition-all hover:scale-75'
+          />
         </button>
       </div>
+
+      {/* active users div */}
+      {showActiveUsers && <ActiveUsersList />}
     </div>
   );
 };
