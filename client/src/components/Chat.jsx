@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import {BiSend} from 'react-icons/bi'
 
 const Chat = ({ username, room, socket }) => {
   const [message, setMessage] = useState("");
@@ -16,10 +17,9 @@ const Chat = ({ username, room, socket }) => {
         }),
       };
 
-      await socket.emit("send_message", messageInfo);
       //added this, so we can see the message we sent on the screen as well as the received message
-      setMessageList([
-        ...messageList,
+      setMessageList((prevMessageList) => [
+        ...prevMessageList,
         {
           username: messageInfo.username,
           room: messageInfo.room,
@@ -28,16 +28,18 @@ const Chat = ({ username, room, socket }) => {
         },
       ]);
 
+      await socket.emit("send_message", messageInfo);
+      
+      
+
       setMessage("");
     }
   };
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      //changed this
-      //so we can see received message
-      setMessageList([
-        ...messageList,
+      setMessageList((prevMessageList) => [
+        ...prevMessageList,
         {
           username: data.username,
           room: data.room,
@@ -46,7 +48,14 @@ const Chat = ({ username, room, socket }) => {
         },
       ]);
     });
+
+    //cleanup function is defined to remove the event listener when the component unmounts using socket.off("receive_message")
+    //This ensures that the event listener is only registered once and prevents multiple instances of the event handler from being active, which could result in receiving duplicate messages.
+    return () => {
+      socket.off("receive_message");
+    };
   }, [socket]);
+
 
   return (
     <div className='chat w-[100vw] h-[100vh] bg-[#2b2b2b] p-[1em] overflow-hidden text-white'>
@@ -54,14 +63,14 @@ const Chat = ({ username, room, socket }) => {
         LOGO
       </div>
 
-      <div className='chat-body overflow-y-scroll border-2 border-[#67ff4f] shadow-sm shadow-[#67ff4f85] w-full h-[70%] mb-[.5em] flex flex-col gap-2'>
+      <div className='chat-body overflow-y-scroll rounded-md border-2 border-[#67ff4f] w-full h-[70%] p-[1em] mb-[.5em] flex flex-col gap-2'>
         {messageList.map((msg) => (
           <div
             key={msg}
-            className={`w-fit flex flex-col rounded-md py-1 px-2 msg-box ${
+            className={` msg-box w-fit flex flex-col rounded-md py-1 px-2 ${
               username === msg.username ? "bg-gray-200" : "bg-green-300"
             }`}
-            id={username === msg.username ? "me" : "you"}
+            style={{ alignSelf: username === msg.username ? "flex-start" : "flex-end" }}
           >
             <div className='msg'>
               <p>{msg.message}</p>
@@ -75,20 +84,20 @@ const Chat = ({ username, room, socket }) => {
         ))}
       </div>
 
-      <div className='chat-footer h-[15%] w-full border border-[#67ff4f] rounded-md'>
+      <div className='chat-footer h-[15%] w-full border border-[#67ff4f] hover:shadow-lg hover:shadow-[#67ff4f85] rounded-md flex'>
         <input
           type='text'
           value={message}
-          className='h-full w-[85%] bg-transparent'
+          className='h-full md:w-[90%] w-[85%] bg-transparent'
           onChange={(e) => {
             setMessage(e.target.value);
           }}
         />
         <button
-          className='w-[15%] h-full bg-[#67ff4f] uppercase text-white hover:bg-[#39932b]'
+          className='md:w-[10%] w-[15%] h-full bg-[#67ff4f] text-white hover:bg-[#39932b] flex justify-center items-center'
           onClick={sendMessage}
         >
-          send
+          <BiSend size={40}/>
         </button>
       </div>
     </div>
