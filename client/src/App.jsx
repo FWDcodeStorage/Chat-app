@@ -4,7 +4,7 @@ import io from "socket.io-client";
 import { useState } from "react";
 import Chat from "./components/Chat";
 
-const socket = io.connect("http://localhost:3000");
+const socket = io.connect("https://chat-app-live-z2di.onrender.com");
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
