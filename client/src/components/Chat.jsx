@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Images from "../Images";
 import ActiveUsersList from "./ActiveUsersList";
 import Picker from '@emoji-mart/react'
@@ -9,6 +9,12 @@ const Chat = ({ username, room, socket }) => {
   const [messageList, setMessageList] = useState([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [showActiveUsers, setShowActiveUsers] = useState(false);
+  const lastMessageRef = useRef(null);
+
+  useEffect(() => {
+    // 👇️ scroll to bottom every time messages change
+    lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [message]);
 
   const addEmoji = (e) => {
     const sym = e.unified.split("_");
@@ -83,10 +89,11 @@ const Chat = ({ username, room, socket }) => {
         />
       </div>
 
-      <div className='chat-body overflow-y-scroll rounded-md w-full sm:h-[65%] h-[70%] p-[1em] mb-[.5em] flex flex-col gap-2'>
-        {messageList.map((msg) => (
+      <div className='chat-body overflow-y-scroll rounded-md w-full sm:h-[65%] h-[70%] p-[1em] mb-[.5em] flex flex-col gap-2'
+      >
+        {messageList.map((msg, index) => (
           <div
-            key={msg}
+            key={index}
             className={` msg-box w-fit flex flex-col rounded-md py-1 px-2 sm:text-base text-sm tracking-wide font-light ${
               username === msg.username ? "bg-gray-500" : "bg-green-300"
             }`}
@@ -94,6 +101,7 @@ const Chat = ({ username, room, socket }) => {
               alignSelf: username === msg.username ? "flex-start" : "flex-end",
               textAlign: username === msg.username ? "start" : "end"
             }}
+            ref={index === messageList.length - 1 ? lastMessageRef : null}
           >
             <div className='msg'>
               <p>{msg.message}</p>
@@ -105,6 +113,7 @@ const Chat = ({ username, room, socket }) => {
             </div>
           </div>
         ))}
+       
       </div>
 
       <div className='chat-footer h-[20%]  w-full border border-[#67ff4f] hover:shadow-lg hover:shadow-[#67ff4f85] rounded-md flex'>
