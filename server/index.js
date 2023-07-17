@@ -20,11 +20,15 @@ const io = new Server(server, {
 });
 
 //connected
+let users = [];
 io.on("connection", (socket) => {
   console.log(`user ${socket.id} is connected`);
 
   //join a room
   socket.on("join_room", (data) => {
+    users.push({ ...data, socketID: socket.id }); // Add socketID property to each user
+    // send the list of users to all connected clients
+    io.emit("newUsers", users);
     socket.join(data.room);
     console.log(`user ${socket.id} joined a room ${data.room}`);
   });
@@ -39,6 +43,15 @@ io.on("connection", (socket) => {
 
   //disconnected
   socket.on("disconnect", () => {
-    console.log(`user ${socket.id} disconnected`);
+    // Updates the list of users when a user disconnects from the server
+    users = users.filter((user) => user.socketID !== socket.id);
+    // Sends the list of users to the client
+    io.emit("newUsers", users);
+    console.log(`user ${socket.id} is disconnected`);
+  });
+
+  // Get the list of active users
+  socket.on("getActiveUsers", () => {
+    io.emit("newUsers", users);
   });
 });

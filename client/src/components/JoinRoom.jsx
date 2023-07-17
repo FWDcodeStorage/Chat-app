@@ -19,6 +19,7 @@ const JoinRoom = ({
     //the username && room condition ensures that both username and room are truthy values
     //This ensures that empty spaces are not considered valid values
     if (username && room && username.trim() !== "" && room.trim() !== "") {
+      localStorage.setItem("username", username);
       socket.emit("join_room", { username, room });
       setIsLogged(true);
     } else alert("Please fill out this form!");
