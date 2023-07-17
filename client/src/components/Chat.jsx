@@ -1,13 +1,27 @@
 import { useEffect, useState } from "react";
 import Images from "../Images";
 import ActiveUsersList from "./ActiveUsersList";
+import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
 
 const Chat = ({ username, room, socket }) => {
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
+  const [showEmoji, setShowEmoji] = useState(false);
   const [showActiveUsers, setShowActiveUsers] = useState(false);
 
-  const sendMessage = async () => {
+  const addEmoji = (e) => {
+    const sym = e.unified.split("_");
+    const codeArray = [];
+    sym.forEach((el) => codeArray.push("0x" + el))
+    let emoji = String.fromCodePoint(...codeArray);
+    setMessage(message + emoji)
+    setShowEmoji(!showEmoji)
+  }
+
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
     if (message !== "") {
       const messageInfo = {
         username: username,
@@ -60,6 +74,7 @@ const Chat = ({ username, room, socket }) => {
     <div className='chat relative w-[95vw] h-[95vh] bg-[#2b2b2b] my-[1em] sm:px-[1em] overflow-hidden text-white border-2 border-[#67ff4f] rounded-md'>
       <div className='chat-header h-[12%] py-[.3em] w-full border-b-2 border-b-[#67ff4f] flex justify-between items-center'>
         <img src={Images.logo} alt='logo' className='max-h-[3em]' />
+        <h1 className="text-[.7rem] uppercase tracking-wider text-gray-500">🚪{room}</h1>
         <img
           src={Images.usersLogo}
           onClick={() => setShowActiveUsers(!showActiveUsers)}
@@ -93,18 +108,37 @@ const Chat = ({ username, room, socket }) => {
       </div>
 
       <div className='chat-footer h-[20%]  w-full border border-[#67ff4f] hover:shadow-lg hover:shadow-[#67ff4f85] rounded-md flex'>
-        <input
-          type='text'
-          placeholder='Type...'
+      <form 
+      onSubmit={sendMessage}
+      className='flex gap-2 w-full'> 
+
+<div className='w-full rounded-sm relative flex items-end'>
+<textarea 
           value={message}
-          className='h-full outline-none sm:w-[90%] w-full bg-transparent px-[.2em] sm:text-lg tracking-wide text-md'
-          onChange={(e) => {
-            setMessage(e.target.value);
-          }}
-        />
-        <button
+          onChange={(e) =>  setMessage(e.target.value)}
+          placeholder='Type...' 
+          className='h-full outline-none sm:w-[90%] w-full bg-transparent px-[.2em] sm:text-lg tracking-wide text-md' 
+          cols="30" 
+          rows="3"></textarea>
+
+<span 
+          onClick={() => setShowEmoji(!showEmoji) }
+          className='cursor-pointer text-[1.5rem]'>😄</span>
+
+          {showEmoji && <div className='absolute bottom-[100%] right-0'>
+          <Picker 
+          data={data}
+          emojiSize={24}
+          emojiButtonSize={28}
+          onEmojiSelect={addEmoji}
+          maxFrequentRows={0}
+          />
+        </div>}
+</div>
+
+<button
           className='sm:w-[10%] w-fit h-full  text-white flex justify-center items-center px-[.2em]'
-          onClick={sendMessage}
+          type="submit"
         >
           <img
             src={Images.sendBtn}
@@ -112,10 +146,13 @@ const Chat = ({ username, room, socket }) => {
             className='sm:h-[4em] h-[3em] hover:transition-all hover:scale-75'
           />
         </button>
+
+      </form>
+        
       </div>
 
       {/* active users div */}
-      {showActiveUsers && <ActiveUsersList />}
+      {showActiveUsers && <ActiveUsersList username={username}/>}
     </div>
   );
 };
