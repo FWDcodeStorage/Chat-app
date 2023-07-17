@@ -93,7 +93,7 @@ const Chat = ({ username, room, socket }) => {
           src={Images.usersLogo}
           onClick={() => setShowActiveUsers(!showActiveUsers)}
           alt='active-users'
-          className='max-h-[3em] hover:transition-all hover:scale-75'
+          className='md:h-[3em] h-[2em] hover:transition-all hover:scale-75'
         />
       </div>
 
@@ -136,7 +136,7 @@ const Chat = ({ username, room, socket }) => {
 
             <span
               onClick={() => setShowEmoji(!showEmoji)}
-              className='cursor-pointer text-[1.5rem]'
+              className='cursor-pointer sm:text-[1.5rem] text-sm'
             >
               😄
             </span>

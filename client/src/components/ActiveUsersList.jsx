@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const ActiveUsersList = ({ socket }) => {
   const [activeUsers, setActiveUsers] = useState([]);
+  const lastUserRef = useRef(null);
+
+  useEffect(() => {
+    // 👇️ scroll to bottom every time user change
+    lastUserRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [activeUsers]);
 
   const leaveChat = () => {
     localStorage.removeItem("username"); // Remove username from localStorage
@@ -27,9 +33,10 @@ const ActiveUsersList = ({ socket }) => {
       </p>
       <div className='list_of_active w-full flex flex-col items-center gap-[2em] overflow-y-scroll'>
         {Array.isArray(activeUsers) && activeUsers.length > 0 ? (
-          activeUsers.map((user) => (
-            <p key={user.username} className='w-full text-center py-[.5em]'>
-              {user.username}
+          activeUsers.map((user, index) => (
+            <p key={user.username} className='w-full text-center py-[.5em]'
+            ref={index === activeUsers.length - 1 ? lastUserRef : null}>
+             {user.username}
             </p>
           ))
         ) : (
